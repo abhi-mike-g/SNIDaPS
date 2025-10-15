@@ -1,0 +1,95 @@
+# Custom Suricata Rules for SDN IDS/IPS System
+# These rules detect various attack patterns in the simulated network
+
+# Port Scanning Detection Rules
+alert tcp any any -> any any (msg:"SDN IDS: Port Scan - TCP Connect Scan"; flow:to_server,established; flags:S; threshold:type both,track by_src,count 10,seconds 60; classtype:attempted-recon; sid:1000001; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: Port Scan - TCP SYN Scan"; flow:to_server; flags:S; threshold:type both,track by_src,count 20,seconds 30; classtype:attempted-recon; sid:1000002; rev:1;)
+
+alert udp any any -> any any (msg:"SDN IDS: Port Scan - UDP Scan"; flow:to_server; threshold:type both,track by_src,count 15,seconds 30; classtype:attempted-recon; sid:1000003; rev:1;)
+
+# ICMP Flood Detection
+alert icmp any any -> any any (msg:"SDN IDS: ICMP Flood Attack"; icmp-type:8; threshold:type both,track by_src,count 50,seconds 10; classtype:denial-of-service; sid:1000004; rev:1;)
+
+alert icmp any any -> any any (msg:"SDN IDS: ICMP Ping Flood"; icmp-type:8; threshold:type both,track by_src,count 100,seconds 5; classtype:denial-of-service; sid:1000005; rev:1;)
+
+# SYN Flood Detection
+alert tcp any any -> any any (msg:"SDN IDS: SYN Flood Attack"; flags:S; threshold:type both,track by_src,count 30,seconds 10; classtype:denial-of-service; sid:1000006; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: SYN Flood - High Rate"; flags:S; threshold:type both,track by_src,count 50,seconds 5; classtype:denial-of-service; sid:1000007; rev:1;)
+
+# UDP Flood Detection
+alert udp any any -> any any (msg:"SDN IDS: UDP Flood Attack"; threshold:type both,track by_src,count 100,seconds 10; classtype:denial-of-service; sid:1000008; rev:1;)
+
+alert udp any any -> any any (msg:"SDN IDS: UDP Flood - DNS Amplification"; dport:53; threshold:type both,track by_src,count 50,seconds 5; classtype:denial-of-service; sid:1000009; rev:1;)
+
+# ARP Spoofing Detection
+alert arp any any -> any any (msg:"SDN IDS: ARP Spoofing - Duplicate IP"; arp_op:2; threshold:type both,track by_dst,count 5,seconds 60; classtype:attempted-user; sid:1000010; rev:1;)
+
+alert arp any any -> any any (msg:"SDN IDS: ARP Spoofing - MAC Address Change"; arp_op:2; threshold:type both,track by_dst,count 3,seconds 30; classtype:attempted-user; sid:1000011; rev:1;)
+
+# SSH Brute Force Detection
+alert tcp any any -> any 22 (msg:"SDN IDS: SSH Brute Force Attack"; flow:to_server,established; flags:A+; threshold:type both,track by_src,count 5,seconds 60; classtype:attempted-user; sid:1000012; rev:1;)
+
+alert tcp any any -> any 22 (msg:"SDN IDS: SSH Multiple Failed Logins"; flow:to_server,established; flags:A+; threshold:type both,track by_src,count 10,seconds 300; classtype:attempted-user; sid:1000013; rev:1;)
+
+# HTTP Attack Detection
+alert http any any -> any any (msg:"SDN IDS: HTTP Directory Traversal"; flow:to_server,established; content:"../"; http_uri; classtype:attempted-user; sid:1000014; rev:1;)
+
+alert http any any -> any any (msg:"SDN IDS: HTTP SQL Injection Attempt"; flow:to_server,established; content:"union"; http_uri; classtype:attempted-user; sid:1000015; rev:1;)
+
+# DNS Attack Detection
+alert udp any any -> any 53 (msg:"SDN IDS: DNS Query Flood"; flow:to_server; dport:53; threshold:type both,track by_src,count 100,seconds 10; classtype:denial-of-service; sid:1000016; rev:1;)
+
+alert udp any any -> any 53 (msg:"SDN IDS: DNS Amplification Attack"; flow:to_server; dport:53; threshold:type both,track by_src,count 50,seconds 5; classtype:denial-of-service; sid:1000017; rev:1;)
+
+# Network Anomaly Detection
+alert tcp any any -> any any (msg:"SDN IDS: Unusual Port Usage"; flow:to_server; dport:!80,22,443,53,25,110,143,993,995; threshold:type both,track by_src,count 10,seconds 60; classtype:misc-activity; sid:1000018; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: High Connection Rate"; flow:to_server; threshold:type both,track by_src,count 100,seconds 30; classtype:misc-activity; sid:1000019; rev:1;)
+
+# Protocol Anomaly Detection
+alert tcp any any -> any any (msg:"SDN IDS: TCP Flag Anomaly"; flags:0; threshold:type both,track by_src,count 5,seconds 60; classtype:misc-activity; sid:1000020; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: TCP RST Flood"; flags:R; threshold:type both,track by_src,count 20,seconds 10; classtype:denial-of-service; sid:1000021; rev:1;)
+
+# Network Scanning Detection
+alert tcp any any -> any any (msg:"SDN IDS: Horizontal Port Scan"; flow:to_server; threshold:type both,track by_src,count 20,seconds 60; classtype:attempted-recon; sid:1000022; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: Vertical Port Scan"; flow:to_server; threshold:type both,track by_dst,count 15,seconds 60; classtype:attempted-recon; sid:1000023; rev:1;)
+
+# ICMP Attack Detection
+alert icmp any any -> any any (msg:"SDN IDS: ICMP Redirect Attack"; icmp-type:5; classtype:attempted-user; sid:1000024; rev:1;)
+
+alert icmp any any -> any any (msg:"SDN IDS: ICMP Timestamp Request"; icmp-type:13; threshold:type both,track by_src,count 10,seconds 60; classtype:misc-activity; sid:1000025; rev:1;)
+
+# Fragmentation Attack Detection
+alert ip any any -> any any (msg:"SDN IDS: IP Fragmentation Attack"; fragbits:M+; threshold:type both,track by_src,count 10,seconds 60; classtype:misc-activity; sid:1000026; rev:1;)
+
+# TTL Anomaly Detection
+alert ip any any -> any any (msg:"SDN IDS: TTL Anomaly - Possible Traceroute"; ttl:1; threshold:type both,track by_src,count 5,seconds 60; classtype:misc-activity; sid:1000027; rev:1;)
+
+# Network Protocol Anomalies
+alert tcp any any -> any any (msg:"SDN IDS: TCP Window Size Anomaly"; window:0; threshold:type both,track by_src,count 5,seconds 60; classtype:misc-activity; sid:1000028; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: TCP Sequence Number Anomaly"; seq:0; threshold:type both,track by_src,count 5,seconds 60; classtype:misc-activity; sid:1000029; rev:1;)
+
+# Application Layer Attacks
+alert http any any -> any any (msg:"SDN IDS: HTTP Request Smuggling"; flow:to_server,established; content:"Transfer-Encoding"; http_header; content:"chunked"; http_header; classtype:attempted-user; sid:1000030; rev:1;)
+
+alert http any any -> any any (msg:"SDN IDS: HTTP Response Splitting"; flow:to_server,established; content:"\r\n\r\n"; http_header; classtype:attempted-user; sid:1000031; rev:1;)
+
+# Network Infrastructure Attacks
+alert tcp any any -> any 23 (msg:"SDN IDS: Telnet Brute Force"; flow:to_server,established; dport:23; threshold:type both,track by_src,count 5,seconds 60; classtype:attempted-user; sid:1000032; rev:1;)
+
+alert tcp any any -> any 21 (msg:"SDN IDS: FTP Brute Force"; flow:to_server,established; dport:21; threshold:type both,track by_src,count 5,seconds 60; classtype:attempted-user; sid:1000033; rev:1;)
+
+# Custom SDN-specific rules
+alert tcp any any -> any 6633 (msg:"SDN IDS: OpenFlow Controller Access"; flow:to_server; dport:6633; classtype:misc-activity; sid:1000034; rev:1;)
+
+alert tcp any any -> any 8080 (msg:"SDN IDS: SDN REST API Access"; flow:to_server; dport:8080; classtype:misc-activity; sid:1000035; rev:1;)
+
+# Network Discovery Detection
+alert icmp any any -> any any (msg:"SDN IDS: ICMP Echo Request - Network Discovery"; icmp-type:8; threshold:type both,track by_src,count 20,seconds 60; classtype:attempted-recon; sid:1000036; rev:1;)
+
+alert tcp any any -> any any (msg:"SDN IDS: TCP Connect Scan - Network Discovery"; flow:to_server,established; flags:S+; threshold:type both,track by_src,count 15,seconds 60; classtype:attempted-recon; sid:1000037; rev:1;)
