@@ -10,7 +10,7 @@ The system follows a multi-plane architecture as shown in the diagram below:
 
 
 <p>
-  <img src="https://github.com/abhi-mike-g/SNIDaPS/blob/main/docs/SNIDAPS_NetArch.png"width="500">
+  <img src="https://github.com/abhi-mike-g/SNIDaPS/blob/main/docs/SNIDAPS_NetArch.png"width="800">
 </p>
 
 
