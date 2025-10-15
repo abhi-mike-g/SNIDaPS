@@ -57,8 +57,8 @@ The system follows a multi-plane architecture as shown in the diagram below:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd SDNIDPS_Curse
+git clone https://github.com/abhi-mike-g/SNIDaPS
+cd SNIDaPS
 ```
 
 ### 2. Run Setup Script
