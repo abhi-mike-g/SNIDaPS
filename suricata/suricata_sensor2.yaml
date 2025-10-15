@@ -1,0 +1,191 @@
+%YAML 1.1
+---
+# Suricata Sensor 2 Configuration for SDN IDS/IPS
+# Monitors traffic from S3 switch
+
+# Default log directory
+default-log-dir: /home/amg/Documents/SNID&PS/SDNIDPS_Curse/logs/
+
+# Network interface configuration
+af-packet:
+  - interface: s3-eth3  # Mirror port from S3
+    threads: auto
+    defrag: yes
+    cluster-type: cluster_flow
+    cluster-id: 2
+    buffer-size: 64mb
+    use-mmap: yes
+    tpacket-v3: yes
+    ring-size: 64mb
+
+# Rule files
+rule-files:
+  - /home/amg/Documents/SNID&PS/SDNIDPS_Curse/suricata/rules/custom.rules
+  - /home/amg/Documents/SNID&PS/SDNIDPS_Curse/suricata/rules/emerging-threats.rules
+
+# Classification configuration
+classification-file: /etc/suricata/classification.config
+reference-config-file: /etc/suricata/reference.config
+
+# Output configuration
+outputs:
+  # EVE JSON output for integration
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: suricata_sensor2_eve.json
+      types:
+        - alert
+        - http
+        - dns
+        - tls
+        - files
+        - ssh
+        - smtp
+        - flow
+        - netflow
+        - dhcp
+        - tls
+        - smb
+        - dce_tcp
+        - dce_udp
+        - nfs
+        - ftp
+        - smtp
+        - irc
+        - krb5
+        - dnp3
+        - modbus
+        - enip
+        - dcerpc
+        - ntp
+        - snmp
+        - tftp
+        - ikev2
+        - rdp
+        - vxlan
+        - mqtt
+        - quic
+        - pgsql
+        - redis
+        - app_proto
+        - anomaly
+        - all
+
+  # Fast log output
+  - fast:
+      enabled: yes
+      filename: suricata_sensor2_fast.log
+      append: yes
+
+  # Unified2 output
+  - unified2-alert:
+      enabled: yes
+      filename: suricata_sensor2_unified2.alert
+      limit: 32mb
+      xff:
+        enabled: no
+
+# App layer protocol detection
+app-layer:
+  protocols:
+    http:
+      enabled: yes
+      libhtp:
+        default-config:
+          personality: IDS
+          request-body-limit: 100kb
+          response-body-limit: 100kb
+          double-decode-path: no
+          double-decode-query: no
+    tls:
+      enabled: yes
+      detection-ports:
+        dp: 443
+    ssh:
+      enabled: yes
+    smtp:
+      enabled: yes
+    imap:
+      enabled: no
+    pop:
+      enabled: no
+    modbus:
+      enabled: no
+    dnp3:
+      enabled: no
+    enip:
+      enabled: no
+    dcerpc:
+      enabled: no
+    ftp:
+      enabled: yes
+    smb:
+      enabled: yes
+    tftp:
+      enabled: yes
+    ikev2:
+      enabled: yes
+    krb5:
+      enabled: yes
+    nfs:
+      enabled: yes
+    snmp:
+      enabled: yes
+    dns:
+      enabled: yes
+    rdp:
+      enabled: yes
+    mqtt:
+      enabled: yes
+    quic:
+      enabled: yes
+    pgsql:
+      enabled: yes
+    redis:
+      enabled: yes
+
+# Flow settings
+flow:
+  memcap: 64mb
+  hash-size: 65536
+  prealloc: 10000
+  emergency-recovery: 30
+
+# Host OS policy
+host-os-policy:
+  windows: [0.0.0.0/0]
+  bsd: []
+  bsd-right: []
+  old-linux: []
+  new-linux: [0.0.0.0/0]
+  old-solaris: []
+  new-solaris: []
+  hpux10: []
+  hpux11: []
+  irix: []
+  macos: []
+  vista: []
+  windows2k3: []
+  windows2k8: []
+  windows7: []
+  windows10: []
+
+# Logging configuration
+logging:
+  default-log-level: info
+  outputs:
+    - console:
+        enabled: yes
+    - file:
+        enabled: yes
+        filename: suricata_sensor2.log
+        level: info
+    - syslog:
+        enabled: no
+
+# Performance tuning
+max-pending-packets: 1024
+runmode: workers
+worker-wait: 1
+worker-wait-timeout: 1000
